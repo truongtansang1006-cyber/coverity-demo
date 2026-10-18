@@ -1,0 +1,75 @@
+name: Coverity Scan
+on:
+  workflow_dispatch:
+
+jobs:
+  coverity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Download Coverity Build Tool
+        run: |
+          curl -s -d "token=${{ secrets.COVERITY_SCAN_TOKEN }}" \
+               --data-urlencode "project=${{ github.repository }}" \
+               https://scan.coverity.com/download/linux64 -o cov.tgz
+          mkdir cov-tool
+          tar xzf cov.tgz -C cov-tool --strip-components=1
+
+      - name: Build with cov-build
+        run: |
+          cov-tool/bin/cov-build --dir cov-int mvn -B clean compile
+
+      - name: Compress results
+        run: tar czf project.tgz cov-int
+
+      - name: Upload to Coverity Scan
+        run: |
+          curl --form token=${{ secrets.COVERITY_SCAN_TOKEN }} \
+               --form email=${{ secrets.COVERITY_EMAIL }} \
+               --form file=@project.tgz \
+               --form version=main \
+               --form description="demo" \
+               "https://scan.coverity.com/builds?project=${{ github.repository }}"name: Coverity Scan
+on:
+  workflow_dispatch:
+
+jobs:
+  coverity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Download Coverity Build Tool
+        run: |
+          curl -s -d "token=${{ secrets.COVERITY_SCAN_TOKEN }}" \
+               --data-urlencode "project=${{ github.repository }}" \
+               https://scan.coverity.com/download/linux64 -o cov.tgz
+          mkdir cov-tool
+          tar xzf cov.tgz -C cov-tool --strip-components=1
+
+      - name: Build with cov-build
+        run: |
+          cov-tool/bin/cov-build --dir cov-int mvn -B clean compile
+
+      - name: Compress results
+        run: tar czf project.tgz cov-int
+
+      - name: Upload to Coverity Scan
+        run: |
+          curl --form token=${{ secrets.COVERITY_SCAN_TOKEN }} \
+               --form email=${{ secrets.COVERITY_EMAIL }} \
+               --form file=@project.tgz \
+               --form version=main \
+               --form description="demo" \
+               "https://scan.coverity.com/builds?project=${{ github.repository }}"
