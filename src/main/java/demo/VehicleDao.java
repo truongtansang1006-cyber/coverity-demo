@@ -4,15 +4,17 @@ import java.sql.*;
 
 public class VehicleDao {
 
-    // Code CÓ LỖI để Coverity phát hiện
     public String getName(Connection con, String id) throws SQLException {
-        Statement st = con.createStatement();
-        ResultSet rs = st.executeQuery(
-            "SELECT name FROM Vehicle WHERE id='" + id + "'");
-        String name = null;
-        if (rs.next()) {
-            name = rs.getString(1);
+        String sql = "SELECT name FROM Vehicle WHERE id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String name = rs.getString(1);
+                    return name != null ? name.trim() : null;
+                }
+            }
         }
-        return name.trim();
+        return null;
     }
 }
