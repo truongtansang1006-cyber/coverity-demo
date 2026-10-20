@@ -4,7 +4,7 @@ import java.sql.*;
 
 public class VehicleDao {
 
-    // Code CÓ LỖI để Coverity phát hiện
+    
     public String getName(Connection con, String id) throws SQLException {
         Statement st = con.createStatement();
         ResultSet rs = st.executeQuery(
